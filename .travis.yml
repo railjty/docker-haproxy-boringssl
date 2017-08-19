@@ -1,0 +1,41 @@
+sudo: required
+services: docker
+
+branches:
+  only:
+    - master
+
+env:
+  global:
+    - REGISTRY_USER=jamiehewland
+    - secure: "mlsrAocM7yMq48RZXFGzxX1eu64cWaneMKy5sS/0apo0aNu0lgMj4Kan4QxnUCOVEdppaeL9iKBehR5KIfiDl16w3SXB2CKkknw0HFXUISA+lliRG3JR0omtxWCVj/2zW9IOD9a2k3grb9jSi5uSEcti0+0p8Bh7L0P6G6yfka/F7XxJgrL87BQUbOLDC/FAvpykKb+wbtNfOImJvJ9Bs9575FchcyDYNO6VmF1Vr9CovZqg9nDP4xeQKx/Fbf5W4engG9Rd0ziqo+NqunFCliDkVNAWzBaEb3a5mP5ip+gRSOGUzD/56kuOMgUO3f43+5I+I3hl2+xgHCGS+t36cE9LhPgMgV4nIHXDiQ2xOOdpbx2i3Ep1PE47w7N5qhzYIlnlHJCjyf3vIhv9k0/c17zHvPovPaxGy+NBUTLM09nQdH8WQ5WUspnyVL/z/zF5BuBY4ggW3eQvh8Z4cQ/yauvSvklSy9tbU8iZ1oknfvONHmWcwbHSdLDGsGu/+b0AaxIS2eXX3/VhudQZ2IbOdIxuM3p92nTHa2GdQhfSpEBYKm8+BAXrFOX0OTXG0XMJzQa9qw64TuYuvhsexTNA6KwYP86LGpzdChJcU11w/9KJ5B/QCe6oZsuO1YYgtJM5Rl2LpimS4Pulv9sgnL/b27S685cM8CsKvuwV+sw3C/Q="
+  matrix:
+    - VERSION=1.8-dev VARIANT=
+    - VERSION=1.8-dev VARIANT=alpine
+
+install:
+  - git clone https://github.com/docker-library/official-images.git ~/official-images
+
+before_script:
+  - cd "$VERSION"
+  - image="$REGISTRY_USER/haproxy-boringssl:${VERSION}${VARIANT+-$VARIANT}"
+  - version="$(awk '$2 == "HAPROXY_VERSION" { print $3; exit }' Dockerfile)"
+  - echo "Building image '$image' for HAProxy version '$version'..."
+  - docker pull "$image" || true
+
+script:
+  - travis_retry docker build --pull --cache-from "$image" -t "$image" "${VARIANT:-.}"
+  # Tag as 'haproxy' to get the official-images tests for the haproxy image
+  - docker tag "$image" haproxy && ~/official-images/test/run.sh haproxy
+
+after_script:
+  - docker images
+
+before_deploy:
+  - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+  - pip install docker-ci-deploy==0.3.0
+deploy:
+  provider: script
+  script: dcd --version "$version" --version-semver --version-latest "$image"
+  on:
+    branch: master
