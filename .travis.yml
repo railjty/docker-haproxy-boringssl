@@ -36,6 +36,6 @@ before_deploy:
   - pip install docker-ci-deploy==0.3.0
 deploy:
   provider: script
-  script: dcd --version "$version" --version-semver --version-latest "$image"
+  script: dcd --tag "$VARIANT" --version "$version" --version-semver --version-latest "$image"
   on:
     branch: master
