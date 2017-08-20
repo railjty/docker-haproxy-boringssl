@@ -36,6 +36,7 @@ before_deploy:
   - pip install docker-ci-deploy==0.3.0
 deploy:
   provider: script
-  script: dcd --tag "$VARIANT" --version "$version" --version-semver --version-latest "$image"
+  # FIXME: Bit complicated so that we can get versioned and '1.8-dev' tags
+  script: dcd -t "$VARIANT" -V "$version" -S -L "$image" && dcd "$image"
   on:
     branch: master
