@@ -7,8 +7,8 @@ ENV HAPROXY_MD5 ac838b03b9d6ed40b19d7b0db3472022
 ENV LUA_VERSION=5.3.4 \
     LUA_SHA1=79790cfd40e09ba796b01a571d4d63b52b1cd950
 
-# chromium-60.0.3112.78
-ENV BORINGSSL_COMMIT 68f84f5c40644e029ed066999448696b01caba7a
+# chromium-61.0.3163.83
+ENV BORINGSSL_COMMIT 14308731e5446a73ac2258688a9688b524483cb6
 
 RUN set -ex; \
     apk add --no-cache --virtual .build-deps \
@@ -64,9 +64,10 @@ RUN set -ex; \
     \
     cd /usr/src/haproxy; \
     makeOpts=' \
+        LD=g++ \
         TARGET=linux2628 \
         USE_LUA=1 LUA_INC=/usr/local/lua/include LUA_LIB=/usr/local/lua/lib \
-        USE_OPENSSL=1 SSL_INC=/usr/local/boringssl/include SSL_LIB=/usr/local/boringssl/lib ADDLIB=-lpthread \
+        USE_OPENSSL=1 SSL_INC=/usr/local/boringssl/include SSL_LIB=/usr/local/boringssl/lib \
         USE_PCRE2=1 USE_PCRE2_JIT=1 \
         USE_ZLIB=1 \
     '; \
