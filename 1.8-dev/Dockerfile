@@ -55,7 +55,7 @@ RUN set -ex; \
         LD=g++ \
         TARGET=linux2628 \
         USE_LUA=1 LUA_INC=/usr/include/lua5.3 \
-        USE_OPENSSL=1 SSL_INC=/usr/local/boringssl/include SSL_LIB=/usr/local/boringssl/lib \
+        USE_OPENSSL=1 SSL_INC=/usr/local/boringssl/include SSL_LIB=/usr/local/boringssl/lib ADDLIB=-lpthread \
         USE_PCRE2=1 \
         USE_ZLIB=1 \
     '; \
